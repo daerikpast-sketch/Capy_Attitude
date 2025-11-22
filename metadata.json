@@ -1,0 +1,5 @@
+{
+  "name": "Freches Capybara Generator",
+  "description": "Eine App, die Bilder von Capybaras generiert, die immer den Mittelfinger zeigen, egal was sonst passiert.",
+  "requestFramePermissions": []
+}
