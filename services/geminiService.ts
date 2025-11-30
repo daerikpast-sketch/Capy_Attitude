@@ -13,7 +13,7 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
 
 export const generateCapybaraImage = async (userPrompt: string, style: string): Promise<string> => {
   if (!process.env.API_KEY) {
-    throw new Error("API Key is missing");
+    throw new Error("API Key is missing. Bitte stelle sicher, dass VITE_API_KEY in den Vercel Environment Variables gesetzt ist.");
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -42,6 +42,13 @@ export const generateCapybaraImage = async (userPrompt: string, style: string): 
         imageConfig: {
           aspectRatio: "1:1", 
         },
+        // IMPORTANT: Disable safety filters to allow the "middle finger" gesture
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ],
       },
     });
 
@@ -55,10 +62,16 @@ export const generateCapybaraImage = async (userPrompt: string, style: string): 
       }
     }
 
-    throw new Error("No image data found in response");
+    // Check if it was blocked due to safety despite settings
+    if (response.candidates && response.candidates[0].finishReason) {
+       throw new Error(`Bild wurde blockiert. Grund: ${response.candidates[0].finishReason}`);
+    }
 
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    throw new Error("Keine Bilddaten erhalten. Bitte versuche es erneut.");
+
+  } catch (error: any) {
+    console.error("Gemini API Error details:", error);
+    // Pass the actual error message to the UI
+    throw new Error(error.message || "Ein unbekannter Fehler ist aufgetreten.");
   }
 };

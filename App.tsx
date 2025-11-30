@@ -44,7 +44,8 @@ const App: React.FC = () => {
       setImageUrl(generatedImage);
     } catch (err: any) {
       console.error(err);
-      setError("Das Bild konnte nicht generiert werden. Möglicherweise hat der Sicherheitsfilter der KI eingegriffen oder es gab ein Netzwerkproblem. Bitte versuche es erneut.");
+      // Display the actual error message to help debugging
+      setError(err.message || "Unbekannter Fehler.");
     } finally {
       setLoading(false);
     }
@@ -146,8 +147,14 @@ const App: React.FC = () => {
             {error && (
               <div className="bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg animate-fade-in">
                 <div className="flex items-start">
-                  <ExclamationTriangleIcon className="h-6 w-6 text-red-500 mr-3 flex-shrink-0" />
-                  <p className="text-red-300">{error}</p>
+                  <ExclamationTriangleIcon className="h-6 w-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
+                  <div className="text-red-300 break-words w-full">
+                    <p className="font-bold mb-1">Fehler aufgetreten:</p>
+                    <p className="text-sm font-mono bg-black/30 p-2 rounded">{error}</p>
+                    <p className="text-xs mt-2 text-red-400">
+                      Falls hier "403" oder "API Key" steht: Prüfe deine Vercel Environment Variables.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
